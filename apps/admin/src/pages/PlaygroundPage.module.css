@@ -1,0 +1,118 @@
+.page {
+  display: grid;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  color: var(--gold-2);
+  letter-spacing: 0.18em;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.header h2 {
+  font-size: 48px;
+  margin-top: 8px;
+}
+
+.header p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  max-width: 560px;
+}
+
+.stage {
+  min-height: 520px;
+  border: 1px solid var(--line);
+  background:
+    linear-gradient(180deg, rgba(212, 175, 110, 0.08), transparent 28%),
+    var(--panel);
+  box-shadow: var(--shadow);
+  display: grid;
+  place-items: center;
+  padding: 40px;
+}
+
+.orbWrap {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+  text-align: center;
+}
+
+.orb {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #f7e7c3, #d4af6e 42%, #6d5428 78%, #1a140c);
+  box-shadow:
+    0 0 0 1px rgba(243, 224, 181, 0.4),
+    0 20px 80px rgba(212, 175, 110, 0.25);
+  display: grid;
+  place-items: center;
+}
+
+.orb[data-state="listening"],
+.orb[data-state="speaking"],
+.orb[data-state="thinking"] {
+  animation: pulse 1.8s ease-in-out infinite;
+}
+
+.visualizer {
+  width: 120px;
+  height: 70px;
+}
+
+.status {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+}
+
+.primary,
+.ghost {
+  border-radius: 999px;
+  padding: 12px 22px;
+  border: 1px solid var(--line);
+}
+
+.primary {
+  background: var(--gold);
+  color: #1a140c;
+  font-weight: 600;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--paper);
+}
+
+.error {
+  color: var(--danger);
+}
+
+@keyframes pulse {
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 40px rgba(212, 175, 110, 0.45);
+  }
+}

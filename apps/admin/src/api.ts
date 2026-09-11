@@ -97,3 +97,15 @@ export async function previewVoice(voiceId: string) {
   }
   return await response.blob();
 }
+
+export function createLivekitToken() {
+  return request<{
+    serverUrl: string;
+    participantToken: string;
+    roomName: string;
+    participantName: string;
+  }>("/api/livekit/token", {
+    method: "POST",
+    body: JSON.stringify({ participantName: "Concierge Manager" }),
+  });
+}
