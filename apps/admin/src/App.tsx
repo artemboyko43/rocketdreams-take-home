@@ -2,6 +2,8 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AppShell } from "./layout/AppShell";
 import { FaqsPage } from "./pages/FaqsPage";
 import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { UnansweredPage } from "./pages/UnansweredPage";
+import { VoicesPage } from "./pages/VoicesPage";
 
 export function App() {
   return (
@@ -12,29 +14,13 @@ export function App() {
           element={
             <PlaceholderPage
               title="Playground"
-              copy="The live voice test console lands in a later slice. Use Knowledge base to manage FAQ content now."
+              copy="The live voice test console lands in the next slice. FAQ, unanswered, and voice settings are live now."
             />
           }
         />
         <Route path="faqs" element={<FaqsPage />} />
-        <Route
-          path="unanswered"
-          element={
-            <PlaceholderPage
-              title="Unanswered questions"
-              copy="The review queue will appear here once guest misses are wired into this console."
-            />
-          }
-        />
-        <Route
-          path="voices"
-          element={
-            <PlaceholderPage
-              title="Voice personality"
-              copy="James, Sofia, Marcus, and Elena will be selectable here in the next operations slice."
-            />
-          }
-        />
+        <Route path="unanswered" element={<UnansweredPage />} />
+        <Route path="voices" element={<VoicesPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

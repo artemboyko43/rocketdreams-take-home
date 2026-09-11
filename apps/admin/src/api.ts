@@ -46,3 +46,54 @@ export function updateFaq(
 export function deleteFaq(id: string) {
   return request<void>(`/api/faqs/${id}`, { method: "DELETE" });
 }
+
+export type Unanswered = {
+  id: string;
+  question: string;
+  frequency: number;
+  status: "open" | "converted" | "dismissed";
+  lastAskedAt: string;
+  firstAskedAt: string;
+};
+
+export type VoiceCard = {
+  id: string;
+  name: string;
+  description: string;
+  active: boolean;
+};
+
+export function fetchUnanswered(status = "open") {
+  return request<{ items: Unanswered[] }>(`/api/unanswered?status=${status}`);
+}
+
+export function convertUnanswered(id: string, input: { answer: string; category: string; tags: string[] }) {
+  return request<{ faq: Faq }>(`/api/unanswered/${id}/convert`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function dismissUnanswered(id: string) {
+  return request<Unanswered>(`/api/unanswered/${id}/dismiss`, { method: "POST" });
+}
+
+export function fetchVoices() {
+  return request<{ activeVoiceId: string; items: VoiceCard[] }>("/api/voices");
+}
+
+export function selectVoice(voiceId: string) {
+  return request<{ voiceId: string }>("/api/voices/active", {
+    method: "PUT",
+    body: JSON.stringify({ voiceId }),
+  });
+}
+
+export async function previewVoice(voiceId: string) {
+  const response = await fetch(`${base}/api/voices/${voiceId}/preview`, { method: "POST" });
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(payload.error ?? "Preview failed");
+  }
+  return await response.blob();
+}
