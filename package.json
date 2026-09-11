@@ -1,0 +1,21 @@
+{
+  "name": "meridian-voice-concierge",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Voice concierge for The Meridian Casino & Resort",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "dev:api": "npm run dev -w @meridian/api",
+    "dev:admin": "npm run dev -w @meridian/admin",
+    "dev:agent": "npm run dev -w @meridian/agent",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
