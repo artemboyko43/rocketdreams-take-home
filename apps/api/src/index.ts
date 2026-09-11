@@ -1,6 +1,10 @@
+import { buildApp } from "./app.ts";
 import { sqlClient } from "./db/client.ts";
 import { migrate } from "./db/migrate.ts";
 import { seed } from "./db/seed.ts";
+
+const port = Number(process.env.API_PORT ?? 3001);
+const host = process.env.HOST ?? "0.0.0.0";
 
 async function waitForDatabase() {
   for (let attempt = 1; attempt <= 30; attempt += 1) {
@@ -20,8 +24,9 @@ async function main() {
   await waitForDatabase();
   await migrate();
   const seeded = await seed();
-  console.log("Meridian database ready", seeded);
-  await sqlClient.end({ timeout: 5 });
+  const app = await buildApp();
+  await app.listen({ port, host });
+  app.log.info({ port, seeded }, "Meridian API ready");
 }
 
 main().catch((error) => {
