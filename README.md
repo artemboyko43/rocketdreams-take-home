@@ -6,7 +6,7 @@
 
 ```bash
 cp .env.example .env
-# fill LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, OPENAI_API_KEY
+# fill LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET from cloud.livekit.io
 docker compose up --build
 ```
 
@@ -21,14 +21,14 @@ API health: [http://localhost:3001/health](http://localhost:3001/health)
 
 ## Credentials
 
+Create a free project at [cloud.livekit.io](https://cloud.livekit.io). Open **Settings → Keys** and copy the three values into `.env`. That project includes **LiveKit Inference** (STT, LLM, TTS), so a separate OpenAI key is not required for voice.
 
-| Variable                                                 | Purpose                                     |
-| -------------------------------------------------------- | ------------------------------------------- |
-| `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | Realtime voice transport and agent dispatch |
-| `OPENAI_API_KEY`                                         | STT, LLM, TTS, and admin voice preview      |
+| Variable | Purpose |
+| --- | --- |
+| `LIVEKIT_URL` / `LIVEKIT_API_KEY` / `LIVEKIT_API_SECRET` | Voice transport and LiveKit Inference |
+| `OPENAI_API_KEY` | Optional. Admin **Preview** button, or to use OpenAI plugins instead of Inference |
 
-
-Optional: `OPENAI_BASE_URL`, `OPENAI_LLM_MODEL`, `OPENAI_STT_MODEL`, `OPENAI_TTS_MODEL` if the provided keys point at a compatible gateway.
+The playground can hear each concierge voice without OpenAI. Preview in the Voices page still needs `OPENAI_API_KEY`.
 
 ## Layout
 
@@ -71,9 +71,6 @@ npm run dev:agent
 | `GET/PUT`               | `/api/voices` / `/api/voices/active` | List / select voice                    |
 | `POST`                  | `/api/voices/:id/preview`            | TTS sample                             |
 | `POST`                  | `/api/livekit/token`                 | Playground access token                |
-
-
-
 
 ## Tests
 

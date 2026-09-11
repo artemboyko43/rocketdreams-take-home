@@ -14,11 +14,11 @@ The corpus is ~50 curated FAQs. Embedding search would add a model call, a vecto
 
 Generic tokens such as `hotel` and `room` are down-weighted. The most distinctive query token must match, so “can I bring my dog” does not invent a pet policy.
 
-## STT → LLM → TTS, not a realtime model
+## STT → LLM → TTS via LiveKit Inference
 
-Tool calling and per-session TTS voice control are more reliable on a chained pipeline. `gpt-4o-mini-tts` accepts speaking instructions, which is how James / Sofia / Marcus / Elena stay distinct on `ash`, `coral`, `echo`, and `sage`.
+Tool calling and per-session TTS are more reliable on a chained pipeline than a realtime speech-to-speech model. By default the agent uses **LiveKit Inference** (included with a free LiveKit Cloud project): Deepgram STT, an OpenAI-class LLM, and Inworld/Cartesia TTS. That matches the take-home instruction to create a free account rather than supplying vendor keys.
 
-The active voice is read from the API at session start (NF-5). New playground sessions pick up the change immediately.
+If `OPENAI_API_KEY` is set, the agent falls back to OpenAI plugins (`ash` / `coral` / `echo` / `sage` plus speaking instructions). The active voice is still read from the API at session start (NF-5).
 
 ## Custom playground
 

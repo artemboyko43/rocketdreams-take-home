@@ -5,6 +5,7 @@ import {
   ServerOptions,
   cli,
   defineAgent,
+  inference,
   llm,
   voice,
 } from "@livekit/agents";
@@ -67,21 +68,35 @@ export default defineAgent({
       ],
     });
 
-    const session = new voice.AgentSession({
-      vad,
-      stt: new openai.STT({
-        model: process.env.OPENAI_STT_MODEL ?? "gpt-4o-mini-transcribe",
-        useRealtime: false,
-      }),
-      llm: new openai.LLM({
-        model: process.env.OPENAI_LLM_MODEL ?? "gpt-4o-mini",
-      }),
-      tts: new openai.TTS({
-        model: process.env.OPENAI_TTS_MODEL ?? "gpt-4o-mini-tts",
-        voice: voiceOption.ttsVoice as "ash" | "coral" | "echo" | "sage",
-        instructions: voiceOption.instructions,
-      }),
-    });
+    const useOpenAI = Boolean(process.env.OPENAI_API_KEY);
+    const session = new voice.AgentSession(
+      useOpenAI
+        ? {
+            vad,
+            stt: new openai.STT({
+              model: process.env.OPENAI_STT_MODEL ?? "gpt-4o-mini-transcribe",
+              useRealtime: false,
+            }),
+            llm: new openai.LLM({
+              model: process.env.OPENAI_LLM_MODEL ?? "gpt-4o-mini",
+            }),
+            tts: new openai.TTS({
+              model: process.env.OPENAI_TTS_MODEL ?? "gpt-4o-mini-tts",
+              voice: voiceOption.ttsVoice as "ash" | "coral" | "echo" | "sage",
+              instructions: voiceOption.instructions,
+            }),
+          }
+        : {
+            vad,
+            stt: new inference.STT({ model: "deepgram/nova-3", language: "en" }),
+            llm: new inference.LLM({ model: "openai/gpt-4.1-mini" }),
+            tts: new inference.TTS({
+              model: voiceOption.inferenceModel,
+              voice: voiceOption.inferenceVoice,
+              language: "en",
+            }),
+          },
+    );
 
     await session.start({
       agent,

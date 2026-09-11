@@ -7,6 +7,8 @@ export type VoiceOption = {
   name: string;
   description: string;
   ttsVoice: string;
+  inferenceModel: string;
+  inferenceVoice: string;
   instructions: string;
   previewLine: string;
 };
@@ -17,6 +19,8 @@ export const VOICES: VoiceOption[] = [
     name: "James",
     description: "Male, mature, warm British accent. Professional and refined.",
     ttsVoice: "ash",
+    inferenceModel: "inworld/inworld-tts-2",
+    inferenceVoice: "Theodore",
     instructions:
       "Speak as James, a mature British hotel concierge. Warm Received Pronunciation, unhurried and refined. Never theatrical. Luxury hospitality, not a caricature.",
     previewLine:
@@ -27,6 +31,8 @@ export const VOICES: VoiceOption[] = [
     name: "Sofia",
     description: "Female, friendly, subtle European accent. Welcoming and elegant.",
     ttsVoice: "coral",
+    inferenceModel: "inworld/inworld-tts-2",
+    inferenceVoice: "Olivia",
     instructions:
       "Speak as Sofia, a welcoming European concierge. Soft continental accent, elegant and friendly. Warm without being overly familiar.",
     previewLine:
@@ -37,6 +43,8 @@ export const VOICES: VoiceOption[] = [
     name: "Marcus",
     description: "Male, American, confident and energetic. Modern and approachable.",
     ttsVoice: "echo",
+    inferenceModel: "cartesia/sonic-3",
+    inferenceVoice: "a167e0f3-df7e-4d52-a9c3-f949145efdab",
     instructions:
       "Speak as Marcus, an American luxury concierge. Confident, modern, and approachable. Energetic but still polished — never loud or salesy.",
     previewLine: "Welcome to The Meridian. Marcus here — tell me what you need and I will make it easy.",
@@ -46,6 +54,8 @@ export const VOICES: VoiceOption[] = [
     name: "Elena",
     description: "Female, American, calm and reassuring. Sophisticated and clear.",
     ttsVoice: "sage",
+    inferenceModel: "inworld/inworld-tts-2",
+    inferenceVoice: "Ashley",
     instructions:
       "Speak as Elena, a calm American concierge. Sophisticated, clear, and reassuring. Measured pace, crystal diction, never rushed.",
     previewLine:
