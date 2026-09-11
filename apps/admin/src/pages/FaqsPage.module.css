@@ -1,0 +1,115 @@
+.page {
+  display: grid;
+  gap: 24px;
+}
+
+.header,
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: end;
+}
+
+.header h2,
+.drawer h3 {
+  font-size: 42px;
+}
+
+.header p,
+.muted {
+  color: var(--muted);
+}
+
+.toolbar input,
+.toolbar select,
+.field input,
+.field textarea,
+.field select {
+  background: var(--ink-2);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px 20px;
+  display: grid;
+  gap: 8px;
+}
+
+.card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.card p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.actions,
+.drawerActions {
+  display: flex;
+  gap: 8px;
+}
+
+button.primary,
+button.ghost,
+button.danger {
+  border-radius: 999px;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+}
+
+button.primary {
+  background: var(--gold);
+  color: #1a140c;
+}
+
+button.ghost,
+button.danger {
+  background: transparent;
+  color: var(--paper);
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+.drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: min(460px, 100%);
+  background: var(--ink-2);
+  border-left: 1px solid var(--line);
+  padding: 28px;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
