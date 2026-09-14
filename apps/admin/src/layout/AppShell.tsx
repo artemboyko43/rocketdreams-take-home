@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { useConversationSession } from "../session/ConversationSession";
 import styles from "./AppShell.module.css";
 
 const links = [
@@ -9,6 +10,9 @@ const links = [
 ];
 
 export function AppShell() {
+  const location = useLocation();
+  const { isLive, requestLeave } = useConversationSession();
+
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
@@ -24,6 +28,13 @@ export function AppShell() {
               to={link.to}
               end={link.to === "/"}
               className={({ isActive }) => (isActive ? styles.active : undefined)}
+              onClick={(event) => {
+                if (!isLive || location.pathname === link.to) {
+                  return;
+                }
+                event.preventDefault();
+                requestLeave(link.to);
+              }}
             >
               {link.label}
             </NavLink>

@@ -5,7 +5,11 @@ import styles from "./FaqsPage.module.css";
 
 export function UnansweredPage() {
   const queryClient = useQueryClient();
-  const queue = useQuery({ queryKey: ["unanswered"], queryFn: () => fetchUnanswered("open") });
+  const queue = useQuery({
+    queryKey: ["unanswered"],
+    queryFn: () => fetchUnanswered("open"),
+    refetchInterval: 4000,
+  });
   const [converting, setConverting] = useState<{
     id: string;
     question: string;
@@ -45,6 +49,9 @@ export function UnansweredPage() {
             Guest questions the concierge could not answer. Convert the useful ones into FAQs.
           </p>
         </div>
+        <button className={styles.ghost} type="button" onClick={() => queue.refetch()}>
+          Refresh
+        </button>
       </header>
 
       {queue.error ? <p className={styles.muted}>{(queue.error as Error).message}</p> : null}

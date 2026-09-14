@@ -13,7 +13,14 @@ import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { buildInstructions, getActiveVoice, recordUnanswered, searchKnowledge } from "./knowledge.ts";
+import {
+  buildInstructions,
+  captureUnansweredIfUnknown,
+  getActiveVoice,
+  guestTextFromMessage,
+  lookupKnowledge,
+  recordUnanswered,
+} from "./knowledge.ts";
 
 export default defineAgent({
   prewarm: async (proc: JobProcess) => {
@@ -25,6 +32,12 @@ export default defineAgent({
 
     const agent = voice.Agent.create({
       instructions: buildInstructions(voiceOption.name),
+      onUserTurnCompleted: async (_ctx, _chatCtx, newMessage) => {
+        const text = guestTextFromMessage(newMessage);
+        if (text) {
+          await captureUnansweredIfUnknown(text);
+        }
+      },
       tools: [
         llm.tool({
           name: "search_knowledge_base",
@@ -33,22 +46,7 @@ export default defineAgent({
           parameters: z.object({
             query: z.string().describe("The guest's question in natural language"),
           }),
-          execute: async ({ query }) => {
-            const result = await searchKnowledge(query);
-            if (!result.matched || !result.match) {
-              return {
-                matched: false,
-                message: "No reliable answer is in the knowledge base.",
-              };
-            }
-            return {
-              matched: true,
-              answer: result.match.faq.answer,
-              question: result.match.faq.question,
-              category: result.match.faq.category,
-              related: result.alternatives.map((item) => item.faq.answer),
-            };
-          },
+          execute: async ({ query }) => lookupKnowledge(query),
         }),
         llm.tool({
           name: "record_unanswered_question",
@@ -68,7 +66,7 @@ export default defineAgent({
       ],
     });
 
-    const useOpenAI = Boolean(process.env.OPENAI_API_KEY);
+    const useOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
     const session = new voice.AgentSession(
       useOpenAI
         ? {
@@ -97,6 +95,12 @@ export default defineAgent({
             }),
           },
     );
+
+    session.on(voice.AgentSessionEventTypes.UserInputTranscribed, (event) => {
+      if (event.isFinal && event.transcript.trim()) {
+        void captureUnansweredIfUnknown(event.transcript);
+      }
+    });
 
     await session.start({
       agent,

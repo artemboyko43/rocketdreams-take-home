@@ -35,6 +35,7 @@ export const FaqUpdateSchema = FaqInputSchema.partial();
 
 export const SearchRequestSchema = z.object({
   query: z.string().min(2).max(500),
+  captureUnanswered: z.boolean().optional(),
 });
 
 export const SearchMatchSchema = z.object({

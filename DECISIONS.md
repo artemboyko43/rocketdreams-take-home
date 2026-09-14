@@ -6,7 +6,7 @@ The PRD allows mixed languages. This assessment is for a TypeScript house (React
 
 ## Knowledge lookup is a backend concern
 
-The LLM is a concierge, not a source of property facts. It must call `search_knowledge_base` before answering and `record_unanswered_question` on a miss. FAQ edits in the admin panel are live for the next turn, and operations get a real unanswered queue.
+The LLM is a concierge, not a source of property facts. It must call `search_knowledge_base` before answering. Unknown guest turns are also captured in `onUserTurnCompleted`, and a search miss with `captureUnanswered` is written to the unanswered queue so staff still see the question if the model only apologizes. FAQ edits in the admin panel are live for the next turn.
 
 ## Lexical search instead of embeddings
 
