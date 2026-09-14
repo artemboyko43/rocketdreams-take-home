@@ -2,5 +2,25 @@
   "name": "@meridian/agent",
   "version": "1.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts dev",
+    "start": "tsx src/main.ts start",
+    "download-files": "tsx src/main.ts download-files",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@livekit/agents": "^1.0.23",
+    "@livekit/agents-plugin-openai": "^1.0.23",
+    "@livekit/agents-plugin-silero": "^1.0.23",
+    "@livekit/rtc-node": "^0.13.20",
+    "@meridian/shared": "1.0.0",
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "typescript": "^5.8.2"
+  }
 }
