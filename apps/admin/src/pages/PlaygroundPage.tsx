@@ -1,7 +1,8 @@
 import { BarVisualizer, LiveKitRoom, RoomAudioRenderer, useVoiceAssistant } from "@livekit/components-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createLivekitToken, fetchVoices } from "../api";
+import { useConversationSession } from "../session/ConversationSession";
 import styles from "./PlaygroundPage.module.css";
 
 const statusCopy: Record<string, string> = {
@@ -15,12 +16,23 @@ const statusCopy: Record<string, string> = {
 
 export function PlaygroundPage() {
   const [connection, setConnection] = useState<{ serverUrl: string; participantToken: string } | null>(null);
+  const { setActive, registerEnd } = useConversationSession();
   const voices = useQuery({ queryKey: ["voices"], queryFn: fetchVoices });
   const start = useMutation({
     mutationFn: createLivekitToken,
     onSuccess: (token) => setConnection({ serverUrl: token.serverUrl, participantToken: token.participantToken }),
   });
   const active = voices.data?.items.find((voice) => voice.active);
+
+  useEffect(() => {
+    setActive(Boolean(connection));
+    return () => setActive(false);
+  }, [connection, setActive]);
+
+  useEffect(() => {
+    registerEnd(() => setConnection(null));
+    return () => registerEnd(null);
+  }, [registerEnd]);
 
   return (
     <section className={styles.page}>

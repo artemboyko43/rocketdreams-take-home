@@ -13,7 +13,7 @@ import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { buildInstructions, getActiveVoice, recordUnanswered, searchKnowledge } from "./knowledge.ts";
+import { buildInstructions, getActiveVoice, lookupKnowledge, recordUnanswered } from "./knowledge.ts";
 
 export default defineAgent({
   prewarm: async (proc: JobProcess) => {
@@ -33,22 +33,7 @@ export default defineAgent({
           parameters: z.object({
             query: z.string().describe("The guest's question in natural language"),
           }),
-          execute: async ({ query }) => {
-            const result = await searchKnowledge(query);
-            if (!result.matched || !result.match) {
-              return {
-                matched: false,
-                message: "No reliable answer is in the knowledge base.",
-              };
-            }
-            return {
-              matched: true,
-              answer: result.match.faq.answer,
-              question: result.match.faq.question,
-              category: result.match.faq.category,
-              related: result.alternatives.map((item) => item.faq.answer),
-            };
-          },
+          execute: async ({ query }) => lookupKnowledge(query),
         }),
         llm.tool({
           name: "record_unanswered_question",

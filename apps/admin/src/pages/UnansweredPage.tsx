@@ -5,7 +5,11 @@ import styles from "./FaqsPage.module.css";
 
 export function UnansweredPage() {
   const queryClient = useQueryClient();
-  const queue = useQuery({ queryKey: ["unanswered"], queryFn: () => fetchUnanswered("open") });
+  const queue = useQuery({
+    queryKey: ["unanswered"],
+    queryFn: () => fetchUnanswered("open"),
+    refetchInterval: 4000,
+  });
   const [converting, setConverting] = useState<{
     id: string;
     question: string;

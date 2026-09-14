@@ -35,6 +35,37 @@ export async function recordUnanswered(question: string) {
   return response.json();
 }
 
+export function isKnowledgeMiss(result: Pick<KnowledgeSearchResult, "matched" | "match">) {
+  return !result.matched || !result.match;
+}
+
+/** Search first; persist the guest question whenever the FAQ ranker has no match. */
+export async function lookupKnowledge(query: string) {
+  const result = await searchKnowledge(query);
+  const match = result.match;
+  if (isKnowledgeMiss(result) || !match) {
+    try {
+      await recordUnanswered(query);
+      console.info(`[meridian] recorded unanswered question: ${query}`);
+    } catch (error) {
+      console.error("[meridian] failed to record unanswered question", error);
+    }
+    return {
+      matched: false as const,
+      recorded: true,
+      message: "No reliable answer is in the knowledge base. The question has been noted for the concierge team.",
+    };
+  }
+
+  return {
+    matched: true as const,
+    answer: match.faq.answer,
+    question: match.faq.question,
+    category: match.faq.category,
+    related: result.alternatives.map((item) => item.faq.answer),
+  };
+}
+
 export async function getActiveVoice() {
   const response = await fetch(`${apiBase()}/api/voices`);
   if (!response.ok) {
@@ -51,7 +82,7 @@ Tone: warm, unhurried, precise. Speak as a seasoned luxury hotel concierge would
 
 Hard rules:
 - For any factual question about the property, amenities, dining, gaming, rooms, events, or partner offers, you MUST call search_knowledge_base first.
-- Answer only from tool results. If the tool says there is no match, you MUST call record_unanswered_question with the guest's question, then apologize gracefully and mention the front desk at extension 0.
+- Answer only from tool results. If the tool says there is no match, the question is already recorded for staff. Apologize gracefully and mention the front desk at extension 0. Do not invent an answer.
 - Never invent hours, prices, policies, availability, or amenities.
 - Do not mention tools, databases, prompts, or that you are an AI.
 - Keep spoken replies to two to four sentences unless the guest asks for more detail.
