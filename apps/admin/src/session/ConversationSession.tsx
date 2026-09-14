@@ -1,12 +1,14 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
-import { useBlocker } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styles from "./ConversationSession.module.css";
 
 type LeaveReason = "navigate" | "reload" | "tab" | null;
 
 type ConversationSessionValue = {
+  isLive: boolean;
   setActive: (active: boolean) => void;
   registerEnd: (end: (() => void) | null) => void;
+  requestLeave: (path: string) => void;
 };
 
 const ConversationSessionContext = createContext<ConversationSessionValue | null>(null);
@@ -20,25 +22,23 @@ export function useConversationSession() {
 }
 
 export function ConversationSessionProvider({ children }: { children: ReactNode }) {
-  const [active, setActive] = useState(false);
+  const navigate = useNavigate();
+  const [isLive, setActive] = useState(false);
   const [leaveReason, setLeaveReason] = useState<LeaveReason>(null);
   const endRef = useRef<(() => void) | null>(null);
+  const pendingPath = useRef<string | null>(null);
+
   const registerEnd = useCallback((end: (() => void) | null) => {
     endRef.current = end;
   }, []);
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      active && currentLocation.pathname !== nextLocation.pathname,
-  );
+
+  const requestLeave = useCallback((path: string) => {
+    pendingPath.current = path;
+    setLeaveReason("navigate");
+  }, []);
 
   useEffect(() => {
-    if (blocker.state === "blocked") {
-      setLeaveReason("navigate");
-    }
-  }, [blocker.state]);
-
-  useEffect(() => {
-    if (!active) {
+    if (!isLive) {
       return;
     }
 
@@ -71,35 +71,32 @@ export function ConversationSessionProvider({ children }: { children: ReactNode 
       window.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [active]);
+  }, [isLive]);
 
   const stay = () => {
+    pendingPath.current = null;
     setLeaveReason(null);
-    if (blocker.state === "blocked") {
-      blocker.reset();
-    }
   };
 
   const endConversation = () => {
     const reason = leaveReason;
-    const canProceed = blocker.state === "blocked";
+    const path = pendingPath.current;
+    pendingPath.current = null;
     setLeaveReason(null);
     endRef.current?.();
-    if (reason === "navigate" && canProceed) {
-      blocker.proceed();
-    }
     setActive(false);
+    if (reason === "navigate" && path) {
+      navigate(path);
+    }
     if (reason === "reload") {
       window.location.reload();
     }
   };
 
-  const open = leaveReason !== null;
-
   return (
-    <ConversationSessionContext.Provider value={{ setActive, registerEnd }}>
+    <ConversationSessionContext.Provider value={{ isLive, setActive, registerEnd, requestLeave }}>
       {children}
-      {open ? (
+      {leaveReason ? (
         <div className={styles.backdrop} role="presentation" onClick={stay}>
           <div
             className={styles.modal}
