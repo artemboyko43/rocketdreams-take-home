@@ -6,6 +6,7 @@ describe("shouldCaptureGuestQuestion", () => {
     expect(shouldCaptureGuestQuestion("Can I smoke in the room?")).toBe(true);
     expect(shouldCaptureGuestQuestion("Are you pet friendly?")).toBe(true);
     expect(shouldCaptureGuestQuestion("Do you have a kids club?")).toBe(true);
+    expect(shouldCaptureGuestQuestion("pet friendly?")).toBe(true);
   });
 
   it("skips greetings and tiny utterances", () => {

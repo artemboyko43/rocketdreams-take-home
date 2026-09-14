@@ -49,6 +49,9 @@ export function UnansweredPage() {
             Guest questions the concierge could not answer. Convert the useful ones into FAQs.
           </p>
         </div>
+        <button className={styles.ghost} type="button" onClick={() => queue.refetch()}>
+          Refresh
+        </button>
       </header>
 
       {queue.error ? <p className={styles.muted}>{(queue.error as Error).message}</p> : null}

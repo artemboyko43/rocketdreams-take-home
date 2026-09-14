@@ -51,6 +51,7 @@ export async function registerFaqRoutes(app: FastifyInstance) {
     const result = bestMatch(query, rows.map(serializeFaq));
     if (!result.matched && captureUnanswered && shouldCaptureGuestQuestion(query)) {
       await upsertUnanswered(query);
+      request.log.info({ query }, "Captured unanswered question");
     }
     return {
       matched: result.matched,

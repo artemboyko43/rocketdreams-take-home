@@ -17,6 +17,7 @@ import {
   buildInstructions,
   captureUnansweredIfUnknown,
   getActiveVoice,
+  guestTextFromMessage,
   lookupKnowledge,
   recordUnanswered,
 } from "./knowledge.ts";
@@ -32,7 +33,7 @@ export default defineAgent({
     const agent = voice.Agent.create({
       instructions: buildInstructions(voiceOption.name),
       onUserTurnCompleted: async (_ctx, _chatCtx, newMessage) => {
-        const text = newMessage.textContent?.trim();
+        const text = guestTextFromMessage(newMessage);
         if (text) {
           await captureUnansweredIfUnknown(text);
         }
@@ -65,7 +66,7 @@ export default defineAgent({
       ],
     });
 
-    const useOpenAI = Boolean(process.env.OPENAI_API_KEY);
+    const useOpenAI = Boolean(process.env.OPENAI_API_KEY?.trim());
     const session = new voice.AgentSession(
       useOpenAI
         ? {
@@ -94,6 +95,12 @@ export default defineAgent({
             }),
           },
     );
+
+    session.on(voice.AgentSessionEventTypes.UserInputTranscribed, (event) => {
+      if (event.isFinal && event.transcript.trim()) {
+        void captureUnansweredIfUnknown(event.transcript);
+      }
+    });
 
     await session.start({
       agent,

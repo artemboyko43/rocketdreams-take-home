@@ -83,6 +83,13 @@
   color: var(--gold);
 }
 
+.heard {
+  margin: 0;
+  max-width: 420px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .actions {
   display: flex;
   gap: 12px;

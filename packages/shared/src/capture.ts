@@ -10,6 +10,7 @@ const SMALL_TALK = new Set([
   "ok",
   "yes",
   "no",
+  "you",
   "sure",
   "please",
   "good",
@@ -26,7 +27,7 @@ export function shouldCaptureGuestQuestion(text: string) {
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter(Boolean);
-  if (words.length < 3) {
+  if (words.length < 2) {
     return false;
   }
   return !words.every((word) => SMALL_TALK.has(word));

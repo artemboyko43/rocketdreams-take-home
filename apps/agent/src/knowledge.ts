@@ -1,7 +1,28 @@
 import { getVoice, shouldCaptureGuestQuestion, type VoiceId } from "@meridian/shared";
 
 function apiBase() {
-  return process.env.API_BASE_URL ?? "http://localhost:3001";
+  const raw = process.env.API_BASE_URL?.trim() || "http://127.0.0.1:3001";
+  return raw.replace("://localhost", "://127.0.0.1");
+}
+
+export function guestTextFromMessage(message: {
+  textContent?: string;
+  rawTextContent?: string;
+  content?: Array<string | { type?: string; transcript?: string }>;
+}) {
+  const fromText = message.textContent?.trim() || message.rawTextContent?.trim();
+  if (fromText) {
+    return fromText;
+  }
+  const parts: string[] = [];
+  for (const part of message.content ?? []) {
+    if (typeof part === "string" && part.trim()) {
+      parts.push(part.trim());
+    } else if (part && typeof part === "object" && part.transcript?.trim()) {
+      parts.push(part.transcript.trim());
+    }
+  }
+  return parts.join(" ").trim();
 }
 
 export type KnowledgeSearchResult = {

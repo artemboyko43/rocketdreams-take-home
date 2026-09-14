@@ -67,6 +67,13 @@ export function fetchUnanswered(status = "open") {
   return request<{ items: Unanswered[] }>(`/api/unanswered?status=${status}`);
 }
 
+export function captureGuestQuestion(query: string) {
+  return request<{ matched: boolean }>("/api/faqs/search", {
+    method: "POST",
+    body: JSON.stringify({ query, captureUnanswered: true }),
+  });
+}
+
 export function convertUnanswered(id: string, input: { answer: string; category: string; tags: string[] }) {
   return request<{ faq: Faq }>(`/api/unanswered/${id}/convert`, {
     method: "POST",
