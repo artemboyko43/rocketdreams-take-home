@@ -13,7 +13,13 @@ import * as openai from "@livekit/agents-plugin-openai";
 import * as silero from "@livekit/agents-plugin-silero";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
-import { buildInstructions, getActiveVoice, lookupKnowledge, recordUnanswered } from "./knowledge.ts";
+import {
+  buildInstructions,
+  captureUnansweredIfUnknown,
+  getActiveVoice,
+  lookupKnowledge,
+  recordUnanswered,
+} from "./knowledge.ts";
 
 export default defineAgent({
   prewarm: async (proc: JobProcess) => {
@@ -25,6 +31,12 @@ export default defineAgent({
 
     const agent = voice.Agent.create({
       instructions: buildInstructions(voiceOption.name),
+      onUserTurnCompleted: async (_ctx, _chatCtx, newMessage) => {
+        const text = newMessage.textContent?.trim();
+        if (text) {
+          await captureUnansweredIfUnknown(text);
+        }
+      },
       tools: [
         llm.tool({
           name: "search_knowledge_base",

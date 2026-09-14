@@ -1,9 +1,10 @@
 import { desc, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { FaqInputSchema, FaqUpdateSchema, SearchRequestSchema } from "@meridian/shared";
+import { FaqInputSchema, FaqUpdateSchema, SearchRequestSchema, shouldCaptureGuestQuestion } from "@meridian/shared";
 import { db } from "../db/client.ts";
 import { faqs } from "../db/schema.ts";
 import { serializeFaq } from "../db/serialize.ts";
+import { upsertUnanswered } from "../search/capture.ts";
 import { bestMatch } from "../search/rank.ts";
 
 export async function registerFaqRoutes(app: FastifyInstance) {
@@ -45,9 +46,12 @@ export async function registerFaqRoutes(app: FastifyInstance) {
   });
 
   app.post("/api/faqs/search", async (request) => {
-    const { query } = SearchRequestSchema.parse(request.body);
+    const { query, captureUnanswered } = SearchRequestSchema.parse(request.body);
     const rows = await db.select().from(faqs);
     const result = bestMatch(query, rows.map(serializeFaq));
+    if (!result.matched && captureUnanswered && shouldCaptureGuestQuestion(query)) {
+      await upsertUnanswered(query);
+    }
     return {
       matched: result.matched,
       query,

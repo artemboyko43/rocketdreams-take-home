@@ -4,7 +4,7 @@ import { ConvertUnansweredSchema, RecordUnansweredSchema } from "@meridian/share
 import { db } from "../db/client.ts";
 import { faqs, unansweredQuestions } from "../db/schema.ts";
 import { serializeFaq } from "../db/serialize.ts";
-import { normalizeText } from "../search/synonyms.ts";
+import { upsertUnanswered } from "../search/capture.ts";
 
 function serializeUnanswered(row: typeof unansweredQuestions.$inferSelect) {
   return {
@@ -37,41 +37,11 @@ export async function registerUnansweredRoutes(app: FastifyInstance) {
 
   app.post("/api/unanswered", async (request, reply) => {
     const { question } = RecordUnansweredSchema.parse(request.body);
-    const normalizedQuestion = normalizeText(question);
-    if (!normalizedQuestion) {
+    const row = await upsertUnanswered(question);
+    if (!row) {
       return reply.code(400).send({ error: "Question is empty after normalization" });
     }
-
-    const [existing] = await db
-      .select()
-      .from(unansweredQuestions)
-      .where(eq(unansweredQuestions.normalizedQuestion, normalizedQuestion))
-      .limit(1);
-
-    if (existing) {
-      const [updated] = await db
-        .update(unansweredQuestions)
-        .set({
-          frequency: existing.frequency + 1,
-          lastAskedAt: new Date(),
-          status: existing.status === "dismissed" ? "open" : existing.status,
-        })
-        .where(eq(unansweredQuestions.id, existing.id))
-        .returning();
-      if (!updated) {
-        return reply.code(500).send({ error: "Failed to update unanswered question" });
-      }
-      return serializeUnanswered(updated);
-    }
-
-    const [created] = await db
-      .insert(unansweredQuestions)
-      .values({ question, normalizedQuestion })
-      .returning();
-    if (!created) {
-      return reply.code(500).send({ error: "Failed to record unanswered question" });
-    }
-    return reply.code(201).send(serializeUnanswered(created));
+    return reply.code(row.frequency === 1 ? 201 : 200).send(serializeUnanswered(row));
   });
 
   app.post("/api/unanswered/:id/convert", async (request, reply) => {

@@ -1,4 +1,4 @@
-import { getVoice, type VoiceId } from "@meridian/shared";
+import { getVoice, shouldCaptureGuestQuestion, type VoiceId } from "@meridian/shared";
 
 function apiBase() {
   return process.env.API_BASE_URL ?? "http://localhost:3001";
@@ -15,7 +15,7 @@ export async function searchKnowledge(query: string): Promise<KnowledgeSearchRes
   const response = await fetch(`${apiBase()}/api/faqs/search`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, captureUnanswered: true }),
   });
   if (!response.ok) {
     throw new Error(`FAQ search failed (${response.status})`);
@@ -39,17 +39,25 @@ export function isKnowledgeMiss(result: Pick<KnowledgeSearchResult, "matched" | 
   return !result.matched || !result.match;
 }
 
-/** Search first; persist the guest question whenever the FAQ ranker has no match. */
+export async function captureUnansweredIfUnknown(query: string) {
+  if (!shouldCaptureGuestQuestion(query)) {
+    return;
+  }
+  try {
+    const result = await searchKnowledge(query);
+    if (isKnowledgeMiss(result)) {
+      console.info(`[meridian] recorded unanswered question: ${query}`);
+    }
+  } catch (error) {
+    console.error("[meridian] failed to capture unanswered question", error);
+  }
+}
+
+/** Search first. A miss is persisted by the API when captureUnanswered is set. */
 export async function lookupKnowledge(query: string) {
   const result = await searchKnowledge(query);
   const match = result.match;
   if (isKnowledgeMiss(result) || !match) {
-    try {
-      await recordUnanswered(query);
-      console.info(`[meridian] recorded unanswered question: ${query}`);
-    } catch (error) {
-      console.error("[meridian] failed to record unanswered question", error);
-    }
     return {
       matched: false as const,
       recorded: true,
